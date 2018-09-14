@@ -1,0 +1,76 @@
+//package server;
+
+import java.io.DataInputStream;
+import java.io.PrintWriter;
+import java.io.DataOutputStream;
+import java.io.*;
+import java.net.*;
+import java.util.Scanner;
+
+@SuppressWarnings("unused")
+public class Server implements Runnable {
+	
+	private static ServerSocket server 			= null;
+	private static String line_in				= "";
+	private static String line_out				= "";
+	
+	public static void main(String args[]) {
+		try {
+			
+			server = new ServerSocket(5000);
+			System.out.println("Server Started");
+			System.out.println("hello");
+
+
+			
+		} catch (IOException x) {
+			System.err.println("Could not listen on port 5000" + x);
+			System.exit(1);
+		}
+		
+		while(true) {
+			Socket socket = null;
+			
+			try {
+				System.out.println("Waiting For Client");
+				
+				socket = server.accept();
+				
+				Thread thread = new Thread(new ClientThread(socket));
+				thread.start();
+				
+			} catch(IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+//		PrintWriter out = new PrintWriter(new BufferedOutputStream(server.getOutputStream()));
+//		out.flush();
+		
+	}
+}
+	
+class ClientThread implements Runnable {
+
+		Socket socket;
+		
+		ClientThread(Socket socket){
+			this.socket = socket;
+		}
+		
+		@Override
+		public void run() {
+			Scanner scanner;
+			
+			try {
+				scanner = new Scanner(new BufferedInputStream(socket.getInputStream()));
+				line_in = scanner.nextLine();
+				
+				System.out.println(line_in);
+			} catch(IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+}
+

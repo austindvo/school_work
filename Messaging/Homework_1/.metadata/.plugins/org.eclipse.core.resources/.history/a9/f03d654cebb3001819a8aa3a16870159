@@ -1,0 +1,60 @@
+package server;
+
+import java.io.*;
+import java.net.*;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+
+
+public class Server {
+
+	private static ServerSocket server 			= null;
+	protected static ArrayList<Client_thread> 	clients;
+	protected static String nm = null;
+
+//private static String line_in				= "";
+
+
+	public static void main(String args[]) {
+		try {
+			
+			server = new ServerSocket(5000);
+			System.out.println("Server Started");
+			accept_clients();
+			
+		} catch (IOException x) {
+			System.err.println("Could not listen on port 5000" + x);
+			System.exit(1);
+		}
+
+//		PrintWriter out = new PrintWriter(new BufferedOutputStream(server.getOutputStream()));
+//		out.flush();
+
+	}
+
+public static void accept_clients(){
+	clients = new ArrayList<Client_thread>();
+	while(true){
+		try{
+			System.out.println("Waiting For Client");
+			
+			Socket socket = server.accept();
+			
+			System.out.println("Client connected");
+			
+			
+			Client_thread client = new Client_thread(socket, clients.size()-1);
+			
+			Thread thread = new Thread(client);
+			thread.start();
+			
+			clients.add(client);
+			
+		} catch (IOException e){
+			System.out.println("Accept Failed");
+		}
+	}
+}
+}
+

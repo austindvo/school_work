@@ -1,0 +1,101 @@
+package client;
+
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+
+/**
+ * 
+ * @author austindv
+ * 
+ * Creates the thread to help the client communicate to the server
+ *
+ */
+public class Server_thread implements Runnable{
+	
+	//creates a socket
+	private Socket socket;
+	//creates a String name
+	private String name;
+	
+	//creates a new BufferedReader to read what the socket received from the server
+	private BufferedReader server_in;
+	
+	//creates a new BufferedReader to read what the user entered in the terminal
+	private BufferedReader user_in;
+	
+	//creates a PrintWriter to send information to the socket
+	private PrintWriter out;
+
+	//creates a new Server_thread object that is given a pre-created socket and the name of the client
+	public Server_thread(Socket socket, String name){
+		
+		//sets the given socket information to this classes socket variable
+		this.socket = socket;
+		
+		//sets the given names value to this classes name variable
+		this.name = name;
+	}
+
+	@Override
+	public void run() {
+		try {
+			
+			//sets out to a BufferedOutputStream to allow the Client_thread to write to the socket
+			out = new PrintWriter(new BufferedOutputStream(socket.getOutputStream()));
+			
+			//sets server_in to an InputStreamReader to allow it to receive information from the server
+			server_in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			
+			//sets user_in to a new InputStreamReader to read from the terminal
+			user_in = new BufferedReader(new InputStreamReader(System.in));
+
+			//send to the server that a new user has joined the channel
+			out.println("User " + name + " has entered the channel");
+			
+			//make sure it actually sends it
+			out.flush();
+
+			String line_in = "";
+			//continue sending to the server while the socket is not closed
+			do {
+				//if the server_in reader is ready aka if something isn't sending info to the socket
+				if(server_in.ready()){
+					
+					//read the input and set in to a new String line_in 
+					line_in = server_in.readLine();
+					
+					//if line_in isn't null
+					if(line_in != null){
+						
+						//print line_in (the message received from the server)
+						System.out.println(line_in);
+					}
+				}
+
+				//if the terminal isn't having something written to it
+				if(user_in.ready()) {
+					
+					//send the information with a tag to the server
+					out.println(name + " > " + user_in.readLine());
+					
+					//make sure it was sent
+					out.flush();
+				} 
+				
+			} while(!line_in.equals("goodbye"));
+			
+			out.println(name + "has left the channel");
+			out.flush();
+			
+			socket.close();
+			
+		//catch if the socket messes up
+		} catch (IOException x) {
+			System.err.println("Fatal Connection Error"); 
+		}
+	}
+}

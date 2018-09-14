@@ -1,0 +1,85 @@
+//package client;
+
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.*;
+import java.util.Scanner;
+
+@SuppressWarnings("unused")
+public class Client {
+	
+	private static Socket socket			= null;
+	private static DataOutputStream output	= null;
+	//private static DataInputStream input	= null;
+	private static BufferedReader input		= null;
+	private static String line_out			= "";
+	private static String line_in			= "";
+	
+
+	
+	public static void main(String args[]) {
+	
+		try {
+			
+		    //connect to locahost on port 5000
+			socket = new Socket("127.0.0.1", 5000);
+			//Print that the Client has connected to the server successfully
+			System.out.println("Connected to server");
+			
+			//takes the input from the terminal
+			input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			//input = new DataInputStream(new BufferedInputStream(socket.getInputStream()))
+			//sends output to the socket
+			output = new DataOutputStream(socket.getOutputStream());
+			
+		} catch(UnknownHostException u) {
+            System.out.println(u);
+        }
+          catch(IOException i) {
+            System.out.println(i);
+        }
+		
+		try {
+
+			
+			Scanner scanner = new Scanner(System.in);
+			
+
+			
+			
+			System.out.println(">Enter your Name:");
+			
+			
+			line_in = scanner.nextLine();
+
+			System.out.println("Hello, " + line_in);
+						
+			output.writeUTF("User " + line_in + " has entered the channel");
+
+			
+			while(!line_in.equals("goodbye")) {
+				//try {
+					//line = input.readUTF();
+					//System.out.println(line);
+					line_out = scanner.nextLine();
+					output.writeUTF(line_out);
+				//} catch(IOException a) {
+				//	System.out.println(a);
+				//}
+			}
+			
+			input.close();
+			output.close();
+			socket.close();
+			scanner.close();
+			
+		} catch (IOException e) {
+			System.err.println("Fatal Connection Error"); //if it can't print this message and the stack
+			e.printStackTrace();
+		}
+	}
+}

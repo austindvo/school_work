@@ -1,0 +1,71 @@
+//package server;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.*;
+import java.net.*;
+import java.util.Scanner;
+
+@SuppressWarnings("unused")
+public class Server implements Runnable {
+	
+	private static Socket socket					= null;
+	private static DataInputStream input	= null;
+	private static DataOutputStream output	= null;
+	private static String line_in				= "";
+	private static String line_out				= "";
+	
+	public static void main(String args[]) {
+		try {
+			
+
+			
+			ServerSocket server = new ServerSocket(5000);
+			System.out.println("Server Started");
+
+			socket = server.accept();
+			System.out.println("hello");
+
+
+		} catch (IOException i) {
+			System.err.println("Could not listen on port 5000" + i);
+		}
+		
+		new Thread(new Server()).start();
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		try {
+		Scanner scanner = new Scanner(System.in);
+		
+		input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+		output = new DataOutputStream(socket.getOutputStream());
+		
+		System.out.println("Waiting For Client");
+
+		
+		while(!line_in.equals("goodbye")) {
+			try {
+				line_out = input.readUTF();
+				System.out.println(line_out);
+				
+				line_in = scanner.nextLine();
+				output.writeUTF(line_in);
+			} catch(IOException a) {
+				System.out.println(a);
+			}
+		}
+
+		input.close();
+		output.close();
+		socket.close();
+		scanner.close();
+		} catch (IOException i) {
+			System.err.println("Could not listen on port 5000" + i);
+		}
+	}
+	
+	
+}

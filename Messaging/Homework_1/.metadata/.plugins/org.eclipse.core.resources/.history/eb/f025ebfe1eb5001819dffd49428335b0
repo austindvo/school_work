@@ -1,0 +1,94 @@
+package server;
+
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+
+/**
+ * 
+ * @author austindv
+ * 
+ * class to create objects that are fed socket information and
+ * handle the client object that is connected to that socket
+ * that implements the Runnable class and extends the server class
+ * te create Client handler threads
+ *
+ */
+public class Client_thread extends Server  implements Runnable {
+	
+	//create a socket object to store the information of the 
+	//socket that was sent when creating a Client_thread object
+	private Socket socket;
+	
+	//create a new PrintWriter object to print to the sockets output stream to send to the client
+	private PrintWriter out;
+	
+	//create a new BufferedReader object to read what the socket received from the client
+	private BufferedReader client_in;
+
+	//creates a new Client_thread with a given socket
+	public Client_thread(Socket socket){
+		
+		//stores the socket information given to this classes socket variable
+		this.socket = socket;
+	}
+	
+	//override Runnable's method to handle what the client sends
+	//and run when a new thread is created
+	@Override
+	public void run() {
+		//surround in a try catch block to catch if the method cannot 
+		//check the socket or do anything with the BufferedReader
+		try {
+			
+			//set out to be a PrintWriter that can send information to the socket's output stream when called
+			out = new PrintWriter(new BufferedOutputStream(socket.getOutputStream()));
+			
+			//set client_in to be a new buffered reader that can read what the socket received from the client
+			client_in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			
+			
+			//while the socket hasn't been closed by the client
+			while(!socket.isClosed()){
+				
+				//set line_in to be the line received by the socket
+				String line_in = client_in.readLine();
+				
+				//as long as line_in is not null
+				if(line_in != null) {
+					
+					//print out the message received in the server's terminal
+					System.out.println(line_in);
+					
+					//for every Client_thread in the clients ArrayList
+					for(Client_thread client : clients) {
+						
+						//as long as the socket info for the client does not 
+						//match the socket info for the socket info belonging to this.socket
+						//(make sure you do not send the message back to the client that sent it)
+						if(!(socket.equals(client.socket))) {
+							
+							//send the message to client
+							client.getWriter().println(line_in);
+							//make sure it sent
+							client.getWriter().flush();
+							
+						}					
+					}
+				}
+			} 
+		//catch the exception if the socket messes up
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	//make sure the Client_thread has a way to access specific PrintWriters of other clients
+	public PrintWriter getWriter(){
+		return out;
+	}
+}
+

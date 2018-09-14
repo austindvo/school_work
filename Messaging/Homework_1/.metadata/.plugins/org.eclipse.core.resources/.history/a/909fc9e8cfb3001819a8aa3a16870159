@@ -1,0 +1,54 @@
+//package server;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Scanner;
+
+//import server.Client_thread;
+
+
+
+
+public class Client_thread extends Server  implements Runnable {
+	private Socket socket;
+	private Scanner in;
+	private PrintWriter out;
+
+	public Client_thread(Socket socket){
+		this.socket = socket;
+	}
+	
+	@Override
+	public void run() {
+
+		try {
+			out = new PrintWriter(new BufferedOutputStream(socket.getOutputStream()));
+			in = new Scanner(new BufferedInputStream(socket.getInputStream()));
+
+			out.print("this is a test");
+			out.flush();
+			
+			
+//			while (!socket.isClosed()) {
+//				String line_in = in.readLine();
+//				if(line_in != null){
+//					for(Client_thread client : clients){
+//						client.getWriter().write(line_in);
+//					}
+//				}
+//			}
+
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
+	public PrintWriter getWriter(){
+		return out;
+	}
+}
+
